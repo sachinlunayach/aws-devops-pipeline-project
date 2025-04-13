@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Starting build at $(date)"
+  build:
+    commands:
+      - echo "Building Docker image"
+      - docker build -t my-devops-site .
+      - docker tag my-devops-site:latest YOUR_AWS_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/my-devops-site:latest
+  post_build:
+    commands:
+      - echo "Pushing image to ECR"
+      - aws ecr get-login-password --region YOUR_REGION | docker login --username AWS --password-stdin YOUR_AWS_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com
+      - docker push YOUR_AWS_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/my-devops-site:latest
+
+artifacts:
+  files:
+    - appspec.yml
+    - scripts/install.sh
+    - scripts/start.sh
